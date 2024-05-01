@@ -1,0 +1,182 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             Int      @id @default(autoincrement())
+  email          String   @unique
+  hashedPassword String
+  username       String?  @unique
+  name           String?
+  verifyToken    String?
+  resetToken     String?
+  role           Role     @default(USER)
+  sex            Boolean?
+  phoneNumber    String?
+  isDeleted      Boolean? @default(false)
+
+  verifiedAt DateTime? @db.DateTime(0)
+  deletedAt  DateTime? @db.DateTime(0)
+  createdAt  DateTime  @default(now()) @db.DateTime(0)
+  updatedAt  DateTime  @default(now()) @updatedAt @db.DateTime(0)
+
+  eventStaff StaffsOnEvents[]
+
+  events    Event[]
+  purchases Purchase[]
+  ETicket   ETicket[]
+
+  @@index([username])
+  @@index([email])
+}
+
+model Event {
+  id            Int             @id @default(autoincrement())
+  name          String
+  description   String
+  start_time    DateTime        @default(now()) @db.DateTime(0)
+  end_time      DateTime        @default(now()) @db.DateTime(0)
+  creatorId     Int
+  status        EventStatusEnum @default(DRAFT)
+  publishedTime DateTime        @default(now()) @db.DateTime(0)
+  locationId    Int
+  location      Location        @relation(fields: [locationId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  createdAt     DateTime        @default(now()) @db.DateTime(0)
+  updatedAt     DateTime        @default(now()) @updatedAt @db.DateTime(0)
+
+  purchases   Purchase[]
+  staffs      StaffsOnEvents[]
+  ETicketBook ETicketBook?
+  ETicket     ETicket[]
+  creator     User             @relation(fields: [creatorId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([name])
+  @@index([creatorId])
+  @@index([locationId])
+}
+
+model Location {
+  id             Int                @id @default(autoincrement())
+  title          String
+  description    String
+  imageUrl       String
+  imageCover     String
+  status         LocationStatusEnum @default(ACTIVE)
+  address        String
+  latitudeFloat  Float
+  longitudeFloat Float
+
+  event Event[]
+
+  @@index([title])
+  @@index([address])
+}
+
+model Purchase {
+  id Int @id @default(autoincrement())
+
+  stripeCheckoutSessionId String?
+  stripeCustomerId        String?
+  stripeSubscriptionId    String?
+
+  eventId Int
+  event   Event @relation(fields: [eventId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  createdAt DateTime @default(now()) @db.DateTime(0)
+  updatedAt DateTime @default(now()) @updatedAt @db.DateTime(0)
+}
+
+model ETicketBook {
+  id        Int               @id @default(autoincrement())
+  total     Int
+  sold      Int
+  price     Int
+  currency  CurrencyEnum      @default(VIETNAM)
+  status    ETicketBookStatus @default(OPEN)
+  startTime DateTime
+  closeTime DateTime
+  eventId   Int               @unique
+  event     Event             @relation(fields: [eventId], references: [id])
+
+  createdAt DateTime  @default(now()) @db.DateTime(0)
+  updatedAt DateTime  @default(now()) @updatedAt @db.DateTime(0)
+  ETicket   ETicket[]
+}
+
+model ETicket {
+  id            Int               @id @default(autoincrement())
+  serialNo      String
+  price         Int
+  currency      CurrencyEnum      @default(VIETNAM)
+  userId        Int
+  eventId       Int
+  eTicketBookId Int
+  status        ETicketStatusEnum @default(NONE)
+  redeemTime    DateTime?
+  thumbnail     String
+  atributes     String
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event       Event       @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eTicketBook ETicketBook @relation(fields: [eTicketBookId], references: [id], onDelete: Cascade)
+  createdAt   DateTime    @default(now()) @db.DateTime(0)
+  updatedAt   DateTime    @default(now()) @updatedAt @db.DateTime(0)
+}
+
+model StaffsOnEvents {
+  userId  Int
+  eventId Int
+
+  user  User  @relation(fields: [userId], references: [id])
+  event Event @relation(fields: [eventId], references: [id])
+
+  @@id([userId, eventId])
+}
+
+enum ETicketStatusEnum {
+  NONE
+  FREE
+  PURCHASE
+  REDEEM
+}
+
+enum CurrencyEnum {
+  VIETNAM
+  USA
+}
+
+enum LocationStatusEnum {
+  ACTIVE
+  DEACTIVE
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum EventStatusEnum {
+  DRAFT
+  PUBLISHED
+  DEACTIVE
+}
+
+enum ETicketBookStatus {
+  OPEN
+  CLOSE
+  SOLD
+}
