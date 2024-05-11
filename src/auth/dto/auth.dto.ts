@@ -19,6 +19,11 @@ export class RegisterDto {
   @ApiProperty({ type: String, required: true, nullable: false })
   name: string;
 
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ type: String, required: true, nullable: false })
+  username: string;
+
   @IsNotEmpty()
   @ApiProperty({ type: String, required: true, nullable: false })
   @IsString()

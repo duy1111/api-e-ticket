@@ -6,8 +6,15 @@ import {
   Post,
   UseGuards,
   Request,
+  Get,
+  Query,
 } from '@nestjs/common';
-import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { APISummaries } from 'src/helpers/helpers';
 import { AuthModel } from './model/auth.model';
@@ -16,8 +23,12 @@ import {
   RegisterDto,
   RequestResetPasswordDto,
   ResetPasswordDto,
+  VerifyUserDto,
 } from './dto/auth.dto';
 import { RefreshJwtGuard } from './guard/refetch.guard';
+import { UserGuard } from './guard/auth.guard';
+import { GetUser } from './decorator/get-user.decorator';
+import { UserType } from 'src/helpers/types';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -29,7 +40,6 @@ export class AuthController {
   @ApiOkResponse({ type: AuthModel })
   @Post('register')
   register(@Body() dto: RegisterDto) {
-    console.log(dto);
     return this.authService.register(dto);
   }
 
@@ -65,5 +75,13 @@ export class AuthController {
     this.authService.resetPassword(dto);
 
     return 'Password reset successfully';
+  }
+
+  @ApiOperation({ summary: APISummaries.USER })
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ type: String })
+  @Get('verify')
+  verify(@Query() query: VerifyUserDto) {
+    return this.authService.verify(query);
   }
 }

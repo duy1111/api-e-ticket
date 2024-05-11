@@ -11,7 +11,6 @@ import { join } from 'path';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import filesystem from './storage/filesystem';
 import { BullModule } from '@nestjs/bull';
-import { RedisHealthModule } from '@liaoliaots/nestjs-redis-health';
 import { PrismaModule } from './prisma/prisma.module';
 import { UserService } from './user/user.service';
 import { UserModule } from './user/user.module';
@@ -23,6 +22,11 @@ import { ETicketBookService } from './e-ticket-book/e-ticket-book.service';
 import { ETicketBookModule } from './e-ticket-book/e-ticket-book.module';
 import { ETicketModule } from './e-ticket/e-ticket.module';
 import AppConfig from './config/config';
+import {
+  EncryptionModule,
+  Cipher,
+  EncryptionService,
+} from '@hedger/nestjs-encryption';
 
 @Module({
   imports: [
@@ -33,29 +37,10 @@ import AppConfig from './config/config';
       isGlobal: true,
       load: [filesystem, AppConfig],
     }),
-    BullModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        redis: {
-          host: configService.get('REDIS_HOST') || 'localhost',
-          port: Number(configService.get('REDIS_PORT')) || 6379,
-        },
-        limiter: {
-          // Limit queue to max 10 jobs per 1 seconds.
-          max: 10,
-          duration: 1000,
-        },
-        attempts: 2,
-        backoff: {
-          // Handle temporal failures
-          type: 'exponential',
-          delay: 1000,
-        },
-        concurrency: 1,
-      }),
-      inject: [ConfigService],
+    EncryptionModule.forRoot({
+      key: process.env.APP_KEY,
+      cipher: Cipher.AES_256_CBC,
     }),
-    RedisHealthModule,
     PrismaModule,
     UserModule,
     AuthModule,

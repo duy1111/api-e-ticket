@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ETicketController } from './e-ticket.controller';
 import { ETicketService } from './e-ticket.service';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Module({
   controllers: [ETicketController],
-  providers: [ETicketService]
+  providers: [ETicketService, PrismaService],
 })
 export class ETicketModule {}

@@ -25,6 +25,7 @@ model User {
   sex            Boolean?
   phoneNumber    String?
   isDeleted      Boolean? @default(false)
+  isVerified     Boolean? @default(false)
 
   verifiedAt DateTime? @db.DateTime(0)
   deletedAt  DateTime? @db.DateTime(0)
@@ -101,34 +102,35 @@ model Purchase {
 }
 
 model ETicketBook {
-  id        Int               @id @default(autoincrement())
+  id        Int                @id @default(autoincrement())
   total     Int
-  sold      Int
+  sold      Int?               @default(0)
   price     Int
-  currency  CurrencyEnum      @default(VIETNAM)
-  status    ETicketBookStatus @default(OPEN)
+  currency  CurrencyEnum?      @default(VIETNAM)
+  status    ETicketBookStatus? @default(OPEN)
   startTime DateTime
   closeTime DateTime
-  eventId   Int               @unique
-  event     Event             @relation(fields: [eventId], references: [id])
+  eventId   Int                @unique
+  event     Event              @relation(fields: [eventId], references: [id])
 
-  createdAt DateTime  @default(now()) @db.DateTime(0)
-  updatedAt DateTime  @default(now()) @updatedAt @db.DateTime(0)
+  createdAt DateTime? @default(now()) @db.DateTime(0)
+  updatedAt DateTime? @default(now()) @updatedAt @db.DateTime(0)
   ETicket   ETicket[]
 }
 
 model ETicket {
-  id            Int               @id @default(autoincrement())
+  id            Int                @id @default(autoincrement())
   serialNo      String
   price         Int
-  currency      CurrencyEnum      @default(VIETNAM)
+  currency      CurrencyEnum       @default(VIETNAM)
   userId        Int
   eventId       Int
   eTicketBookId Int
-  status        ETicketStatusEnum @default(NONE)
+  status        ETicketStatusEnum? @default(NONE)
   redeemTime    DateTime?
-  thumbnail     String
-  atributes     String
+  thumbnail     String?
+  atributes     String?
+  QrCode        String?            @db.Text
 
   user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   event       Event       @relation(fields: [eventId], references: [id], onDelete: Cascade)

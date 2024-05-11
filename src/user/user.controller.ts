@@ -37,11 +37,11 @@ export class UserController {
   }
 
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: APISummaries.ADMIN })
+  @ApiOperation({ summary: APISummaries.USER })
   @ApiOkResponse({ type: UserModel })
   @Get('getUserByEmail/:email')
   getUserByEmail(@Param('email') email: string): Promise<User> {
-    return this.getUserByEmail(email);
+    return this.userService.getUserByEmail(email);
   }
 
   @HttpCode(HttpStatus.OK)

@@ -47,4 +47,12 @@ export class UserService {
 
     return 'Verification email sended';
   }
+
+  async getUserByEmail(email: string): Promise<User> {
+    return await this.prisma.user.findFirst({
+      where: {
+        email,
+      },
+    });
+  }
 }

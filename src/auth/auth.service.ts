@@ -15,6 +15,7 @@ import {
   RegisterDto,
   RequestResetPasswordDto,
   ResetPasswordDto,
+  VerifyUserDto,
 } from './dto/auth.dto';
 import { pick } from 'lodash';
 import { genRandomString } from 'src/helpers/helpers';
@@ -125,33 +126,22 @@ export class AuthService {
     };
   }
 
-  async verifyUser(user: { email: string; username: string }): Promise<string> {
-    const verifyToken = genRandomString(10);
-
-    const existedUser = await this.prisma.user.findFirst({
+  async verify(query: VerifyUserDto) {
+    const user = await this.prisma.user.updateMany({
       where: {
-        username: user.username,
+        verifyToken: query.token,
       },
-      select: {
-        name: true,
-      },
-    });
-
-    await this.prisma.user.update({
       data: {
-        verifyToken: verifyToken,
-      },
-      where: {
-        username: user.username,
+        isVerified: true,
+        verifiedAt: new Date(),
       },
     });
 
-    this.mailService.sendEmailConfirmation(
-      { email: user.email, name: existedUser.name },
-      verifyToken,
-    );
+    if (user.count > 0) {
+      return 'User verified successfully';
+    }
 
-    return 'Verification email sended';
+    return 'Verify user failed';
   }
 
   async resetPasswordRequest(dto: RequestResetPasswordDto): Promise<void> {

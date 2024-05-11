@@ -8,17 +8,17 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
 @Module({
   imports: [
     MailerModule.forRootAsync({
-      useFactory: async (config: ConfigService) => ({
+      useFactory: async () => ({
         transport: {
-          host: config.get('mail.host'),
+          host: process.env.MAIL_HOST,
           secure: false,
           auth: {
-            user: config.get('mail.username'),
-            pass: config.get('mail.password'),
+            user: process.env.MAIL_USERNAME,
+            pass: process.env.MAIL_PASSWORD,
           },
         },
         defaults: {
-          from: `"No Reply" <${config.get('mail.from')}>`,
+          from: `"No Reply" <${process.env.MAIL_FROM}>`,
         },
         tls: {
           rejectUnauthorized: false,

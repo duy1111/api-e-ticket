@@ -13,7 +13,7 @@ export class MailService {
     user: { email: string; name: string },
     token: string,
   ) {
-    const url = `${process.env.FRONTEND_URL}/new-verification?token=${token}`;
+    const url = `${process.env.FRONTEND_URL}/auth/new-verification?token=${token}`;
 
     await this.mailerService.sendMail({
       to: user.email,
