@@ -18,6 +18,10 @@ export class EventModel {
   description: string;
 
   @Expose()
+  @ApiProperty({ type: String })
+  imageUrl: string;
+
+  @Expose()
   @ApiProperty({ type: Date })
   end_time: Date;
 

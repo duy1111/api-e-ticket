@@ -14,26 +14,6 @@ export class LocationModel {
 
   @Expose()
   @ApiProperty({ type: String })
-  title: string;
-
-  @Expose()
-  @ApiProperty({ type: String })
-  description: string;
-
-  @Expose()
-  @ApiProperty({ type: String })
-  imageUrl: string;
-
-  @Expose()
-  @ApiProperty({ type: String })
-  imageCover: string;
-
-  @Expose()
-  @ApiProperty({ type: String })
-  status: LocationStatusEnum;
-
-  @Expose()
-  @ApiProperty({ type: String })
   address: string;
 
   @Expose()

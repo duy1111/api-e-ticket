@@ -1,7 +1,8 @@
 import { Global, Module } from '@nestjs/common';
 import { StripeService } from './stripe.service';
 import { StripeController } from './stripe.controller';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Module({
   imports: [
@@ -18,7 +19,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     // }),
   ],
   controllers: [StripeController],
-  providers: [StripeService],
+  providers: [StripeService, PrismaService],
 })
 @Global()
 export class StripeModule {}

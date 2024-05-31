@@ -1,10 +1,13 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
+  Param,
   Post,
+  Put,
   Query,
   UseGuards,
   ValidationPipe,
@@ -21,6 +24,8 @@ import { CreateEventDto } from './dto/create-event.dto';
 import { EventService } from './event.service';
 import { PageDto } from 'src/prisma/helper/prisma.helper';
 import { EventModel } from './model/event.model';
+import { EventPublicDto } from './dto/event-public.dto';
+import { AdminGuard, UserGuard } from 'src/auth/guard/auth.guard';
 
 @ApiTags('event')
 @Controller('event')
@@ -30,7 +35,8 @@ export class EventController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: APISummaries.ADMIN })
   @ApiOkResponse({ type: Event })
-  @UseGuards(UseGuards)
+  @ApiBearerAuth()
+  @UseGuards(UserGuard)
   @Post('create')
   async createLocation(@Body() data: CreateEventDto): Promise<Event> {
     return await this.eventService.createEvent(data);
@@ -38,13 +44,63 @@ export class EventController {
 
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: APISummaries.ADMIN })
+  @ApiOkResponse({ type: Event })
+  @ApiBearerAuth()
+  @UseGuards(UserGuard)
+  @Put('update/:id')
+  async updateLocation(@Body() data: CreateEventDto): Promise<Event> {
+    return await this.eventService.createEvent(data);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: APISummaries.ADMIN })
   @ApiOkResponse({ type: [EventModel] })
   @ApiBearerAuth()
-  @UseGuards(UseGuards)
+  @UseGuards(AdminGuard)
   @Get()
-  findAllEvents(
-    @Query(new ValidationPipe({ transform: true })) query: PageDto,
-  ): Promise<EventModel[]> {
-    return this.eventService.getAllEvents(query);
+  findAllEvents(): // @Query(new ValidationPipe({ transform: true })) query: PageDto,
+  Promise<EventModel[]> {
+    return this.eventService.getAllEvents();
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: APISummaries.ADMIN })
+  @ApiOkResponse({ type: [EventModel] })
+  @ApiBearerAuth()
+  @UseGuards(UserGuard)
+  @Get()
+  listEventIntro(): // @Query(new ValidationPipe({ transform: true })) query: PageDto,
+  Promise<EventModel[]> {
+    return this.eventService.getAllEvents();
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: APISummaries.ADMIN })
+  @ApiOkResponse({ type: EventModel })
+  @ApiBearerAuth()
+  @UseGuards(UserGuard)
+  @Get(':id')
+  getEvent(@Param('id') id: number): Promise<EventModel> {
+    return this.eventService.getEvent(id);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: APISummaries.ADMIN })
+  @ApiOkResponse({ type: EventModel })
+  @ApiBearerAuth()
+  @UseGuards(AdminGuard)
+  @Post('public')
+  publicEvent(@Body() dto: EventPublicDto): Promise<EventModel> {
+    return this.eventService.publicEvent(dto.id);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: APISummaries.ADMIN })
+  @ApiOkResponse({ type: EventModel })
+  @ApiBearerAuth()
+  @UseGuards(UserGuard)
+  @Delete('delete/:id')
+  deleteEvent(@Param('id') id: number): Promise<EventModel> {
+    return this.eventService.deleteEvent(id);
   }
 }

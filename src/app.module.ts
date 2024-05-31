@@ -27,6 +27,7 @@ import {
   Cipher,
   EncryptionService,
 } from '@hedger/nestjs-encryption';
+import { StripeModule } from './stripe/stripe.module';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import {
     LocationModule,
     ETicketBookModule,
     ETicketModule,
+    StripeModule,
   ],
   controllers: [AppController],
   providers: [AppService, UserService, ETicketBookService],

@@ -7,7 +7,7 @@ export function setupSwagger(app: INestApplication): INestApplication {
     .setTitle('Traveling API')
     .setDescription('Traveling API description')
     .setVersion('1.0')
-    .addBearerAuth(undefined, 'defaultToken')
+    .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config, {
     operationIdFactory: (controllerKey: string, methodKey: string) =>

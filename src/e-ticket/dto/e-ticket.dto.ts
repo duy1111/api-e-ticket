@@ -21,11 +21,6 @@ export class CreateETicketDto {
   @IsNumber()
   @IsNotEmpty()
   @ApiProperty({ type: Number, required: true, nullable: false })
-  userId: number;
-
-  @IsNumber()
-  @IsNotEmpty()
-  @ApiProperty({ type: Number, required: true, nullable: false })
   eventId: number;
 
   @IsNumber()

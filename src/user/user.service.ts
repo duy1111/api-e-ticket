@@ -3,6 +3,8 @@ import { User } from '@prisma/client';
 import { genRandomString } from 'src/helpers/helpers';
 import { MailService } from 'src/mail/mail.service';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { UserModel } from './model/user.model';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class UserService {
@@ -11,12 +13,17 @@ export class UserService {
     private mailService: MailService,
   ) {}
 
-  async findById(id: number): Promise<User> {
-    return await this.prisma.user.findUnique({
+  async findById(id: number): Promise<UserModel> {
+    const user = await this.prisma.user.findUnique({
       where: {
         id,
       },
+      select: {
+        hashedPassword: false,
+      },
     });
+
+    return plainToInstance(UserModel, user);
   }
 
   async verifyUser(user: { email: string; username: string }): Promise<string> {

@@ -16,7 +16,10 @@ export class ETicketService {
     private readonly crypto: EncryptionService,
   ) {}
 
-  async createETicket(dto: CreateETicketDto): Promise<ETicketModel> {
+  async createETicket(
+    dto: CreateETicketDto,
+    userId: number,
+  ): Promise<ETicketModel> {
     const encrypted = this.crypto.encrypt(JSON.stringify(dto));
     console.log({
       ...dto,
@@ -26,6 +29,7 @@ export class ETicketService {
     const eTicket = await this.prisma.eTicket.create({
       data: {
         ...dto,
+        userId: userId,
         QrCode: encrypted,
         status: ETicketStatusEnum.PURCHASE,
       },
@@ -80,6 +84,20 @@ export class ETicketService {
     const eTickets = await this.prisma.eTicket.findMany({
       where: {
         userId: userId,
+      },
+      include: {
+        event: {
+          include: {
+            location: true,
+          },
+        },
+        user: {
+          select: {
+            id: true,
+            email: true,
+            username: true,
+          },
+        },
       },
     });
 

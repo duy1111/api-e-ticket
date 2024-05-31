@@ -26,9 +26,6 @@ import {
   VerifyUserDto,
 } from './dto/auth.dto';
 import { RefreshJwtGuard } from './guard/refetch.guard';
-import { UserGuard } from './guard/auth.guard';
-import { GetUser } from './decorator/get-user.decorator';
-import { UserType } from 'src/helpers/types';
 
 @Controller('auth')
 @ApiTags('auth')

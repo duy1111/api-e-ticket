@@ -15,6 +15,11 @@ export class CreateEventDto {
 
   @IsString()
   @IsNotEmpty()
+  @ApiProperty({ type: String, required: true, nullable: false })
+  imageUrl: string;
+
+  @IsString()
+  @IsNotEmpty()
   @ApiProperty({ type: Date, required: true, nullable: false })
   start_time: Date;
 

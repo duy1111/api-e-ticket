@@ -12,7 +12,7 @@ export class LocationController {
   constructor(private readonly locationService: LocationService) {}
 
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: APISummaries.ADMIN })
+  @ApiOperation({ summary: APISummaries.USER })
   @ApiOkResponse({ type: LocationModel })
   @Post('create')
   async createLocation(@Body() data: CreateLocationDto) {
