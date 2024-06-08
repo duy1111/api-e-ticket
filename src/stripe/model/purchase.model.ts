@@ -1,41 +1,36 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { CurrencyEnum } from '@prisma/client';
 import { Expose } from 'class-transformer';
 import { EventModel } from 'src/event/model/event.model';
 import { UserModel } from 'src/user/model/user.model';
 
-export class ETicketModel {
+export class PurchaseModel {
   @Expose()
   @ApiProperty({ type: Number })
   id: number;
 
   @Expose()
-  @ApiProperty({ type: Number })
-  price: number;
+  @ApiProperty({ type: String })
+  stripeCheckoutSessionId: string;
 
   @Expose()
   @ApiProperty({ type: String })
-  serialNo: string;
+  stripeCustomerId: string;
 
   @Expose()
   @ApiProperty({ type: String })
-  QrCode: string;
+  stripeSubscriptionId: string;
 
   @Expose()
   @ApiProperty({ type: String })
-  currency: CurrencyEnum;
+  eventId: string;
 
   @Expose()
-  @ApiProperty({ type: Number })
-  userId: number;
+  @ApiProperty({ type: String })
+  userId: string;
 
   @Expose()
-  @ApiProperty({ type: Number })
-  eventId: number;
-
-  @Expose()
-  @ApiProperty({ type: Number })
-  eTicketBookId: number;
+  @ApiProperty({ type: Date })
+  createdAt: Date;
 
   @Expose()
   @ApiProperty({ type: () => EventModel })
@@ -44,8 +39,4 @@ export class ETicketModel {
   @Expose()
   @ApiProperty({ type: () => UserModel })
   user: UserModel;
-
-  @Expose()
-  @ApiProperty({ type: Date })
-  redeemTime: Date;
 }

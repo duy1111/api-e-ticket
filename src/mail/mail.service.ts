@@ -26,6 +26,29 @@ export class MailService {
     });
   }
 
+  async sendPurchaseETicketEmail(
+    user: { email: string; name: string },
+    data: {
+      qrCodes: string[];
+      nameEvent: string;
+      venue: string;
+      startDate: string;
+    },
+  ) {
+    await this.mailerService.sendMail({
+      to: user.email,
+      subject: 'Purchase E-Ticket!',
+      template: 'purchase-eticket',
+      context: {
+        name: user.name,
+        qrCodes: data.qrCodes,
+        nameEvent: data.nameEvent,
+        venue: data.venue,
+        startDate: data.startDate,
+      },
+    });
+  }
+
   async sendResetPasswordEmail(
     user: { email: string; name: string },
     token: string,

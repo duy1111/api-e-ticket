@@ -5,6 +5,7 @@ import { MailService } from 'src/mail/mail.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UserModel } from './model/user.model';
 import { plainToInstance } from 'class-transformer';
+import { UserType } from 'src/helpers/types';
 
 @Injectable()
 export class UserService {
@@ -61,5 +62,21 @@ export class UserService {
         email,
       },
     });
+  }
+
+  async updateProfile(user: UserType, dto: any): Promise<UserModel> {
+    const updatedUser = await this.prisma.user.update({
+      data: {
+        ...dto,
+      },
+      where: {
+        id: user.id,
+      },
+      select: {
+        hashedPassword: false,
+      },
+    });
+
+    return plainToInstance(UserModel, updatedUser);
   }
 }

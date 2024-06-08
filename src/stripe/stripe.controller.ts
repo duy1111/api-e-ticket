@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   Headers,
   HttpCode,
   HttpStatus,
@@ -14,7 +15,8 @@ import { UserType } from 'src/helpers/types';
 import { GetUser } from 'src/auth/decorator/get-user.decorator';
 import { CreateCheckoutDto } from './dto/checkout.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { UserGuard } from 'src/auth/guard/auth.guard';
+import { AdminGuard, UserGuard } from 'src/auth/guard/auth.guard';
+import { PurchaseModel } from './model/purchase.model';
 
 @Controller('')
 export class StripeController {
@@ -38,5 +40,37 @@ export class StripeController {
     @Headers('stripe-signature') signature: string,
   ): void {
     this.stripeService.webhookReceiver(req.rawBody, signature);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Get('billing')
+  @ApiBearerAuth()
+  @UseGuards(AdminGuard)
+  async getBilling(): Promise<PurchaseModel[]> {
+    return await this.stripeService.getBilling();
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Get('getTotalRevenue')
+  @ApiBearerAuth()
+  @UseGuards(AdminGuard)
+  async getTotalRevenue(): Promise<number> {
+    return await this.stripeService.getTotalRevenue();
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Get('getSalesCount')
+  @ApiBearerAuth()
+  @UseGuards(AdminGuard)
+  async getSalesCount(): Promise<number> {
+    return await this.stripeService.getSalesCount();
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Get('getGraphRevenue')
+  @ApiBearerAuth()
+  @UseGuards(AdminGuard)
+  async getGraphRevenue(): Promise<any[]> {
+    return await this.stripeService.getGraphRevenue();
   }
 }

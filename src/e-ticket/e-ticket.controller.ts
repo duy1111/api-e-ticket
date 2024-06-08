@@ -6,6 +6,7 @@ import {
   HttpStatus,
   Param,
   Post,
+  Request,
   UseGuards,
 } from '@nestjs/common';
 import { ETicketService } from './e-ticket.service';
@@ -21,7 +22,7 @@ import { CreateETicketDto } from './dto/e-ticket.dto';
 import { GetUser } from 'src/auth/decorator/get-user.decorator';
 import { UserType } from 'src/helpers/types';
 import { scanETicketDto } from './dto/scan-e-ticket.dto';
-import { UserGuard } from 'src/auth/guard/auth.guard';
+import { AdminGuard, UserGuard } from 'src/auth/guard/auth.guard';
 
 @ApiTags('e-ticket')
 @Controller('e-ticket')
@@ -63,10 +64,21 @@ export class ETicketController {
   }
 
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: APISummaries.ADMIN })
+  @ApiOkResponse({ type: [ETicketModel] })
+  @ApiBearerAuth()
+  @UseGuards(AdminGuard)
+  @Get('/all')
+  async getAllETicket(): Promise<ETicketModel[]> {
+    return await this.eTicketService.getAllETickets();
+  }
+
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: APISummaries.USER })
   @ApiOkResponse({ type: ETicketModel })
   @Post('/scan')
   async scanETicket(@Body() dto: scanETicketDto): Promise<ETicketModel> {
+    console.log('scanETicket', dto);
     return await this.eTicketService.scanETicket(
       dto.qrCode,
       dto.eTicketId,

@@ -45,7 +45,7 @@ model User {
 model Event {
   id            Int             @id @default(autoincrement())
   name          String
-  description   String
+  description   String          @db.Text
   start_time    DateTime        @default(now()) @db.DateTime(0)
   end_time      DateTime        @default(now()) @db.DateTime(0)
   creatorId     Int
@@ -108,7 +108,7 @@ model ETicketBook {
   total     Int
   sold      Int?               @default(0)
   price     Int
-  currency  CurrencyEnum?      @default(VIETNAM)
+  currency  CurrencyEnum?      @default(USD)
   status    ETicketBookStatus? @default(OPEN)
   startTime DateTime
   closeTime DateTime
@@ -124,11 +124,11 @@ model ETicket {
   id            Int                @id @default(autoincrement())
   serialNo      String
   price         Int
-  currency      CurrencyEnum       @default(VIETNAM)
+  currency      CurrencyEnum       @default(USD)
   userId        Int
   eventId       Int
   eTicketBookId Int
-  status        ETicketStatusEnum? @default(NONE)
+  status        ETicketStatusEnum? @default(PURCHASE)
   redeemTime    DateTime?
   thumbnail     String?
   atributes     String?
@@ -159,8 +159,8 @@ enum ETicketStatusEnum {
 }
 
 enum CurrencyEnum {
-  VIETNAM
-  USA
+  VND
+  USD
 }
 
 enum LocationStatusEnum {

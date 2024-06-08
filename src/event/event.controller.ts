@@ -26,6 +26,7 @@ import { PageDto } from 'src/prisma/helper/prisma.helper';
 import { EventModel } from './model/event.model';
 import { EventPublicDto } from './dto/event-public.dto';
 import { AdminGuard, UserGuard } from 'src/auth/guard/auth.guard';
+import { UpdateEventDto } from './dto/update-event.dto';
 
 @ApiTags('event')
 @Controller('event')
@@ -33,7 +34,7 @@ export class EventController {
   constructor(private eventService: EventService) {}
 
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: APISummaries.ADMIN })
+  @ApiOperation({ summary: APISummaries.USER })
   @ApiOkResponse({ type: Event })
   @ApiBearerAuth()
   @UseGuards(UserGuard)
@@ -48,8 +49,11 @@ export class EventController {
   @ApiBearerAuth()
   @UseGuards(UserGuard)
   @Put('update/:id')
-  async updateLocation(@Body() data: CreateEventDto): Promise<Event> {
-    return await this.eventService.createEvent(data);
+  async updateLocation(
+    @Body() data: UpdateEventDto,
+    @Param('id') id: number,
+  ): Promise<string> {
+    return await this.eventService.updateEvent(data, id);
   }
 
   @HttpCode(HttpStatus.OK)
@@ -66,19 +70,16 @@ export class EventController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: APISummaries.ADMIN })
   @ApiOkResponse({ type: [EventModel] })
-  @ApiBearerAuth()
-  @UseGuards(UserGuard)
-  @Get()
-  listEventIntro(): // @Query(new ValidationPipe({ transform: true })) query: PageDto,
-  Promise<EventModel[]> {
+  // @ApiBearerAuth()
+  // @UseGuards(UserGuard)
+  @Get('/intro')
+  listEventIntro(): Promise<EventModel[]> {
     return this.eventService.getAllEvents();
   }
 
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: APISummaries.ADMIN })
   @ApiOkResponse({ type: EventModel })
-  @ApiBearerAuth()
-  @UseGuards(UserGuard)
   @Get(':id')
   getEvent(@Param('id') id: number): Promise<EventModel> {
     return this.eventService.getEvent(id);

@@ -6,6 +6,7 @@ import {
   HttpStatus,
   Param,
   Post,
+  Put,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -22,6 +23,7 @@ import { User } from '@prisma/client';
 import { VerifyDto } from './dto/verify.dto';
 import { GetUser } from 'src/auth/decorator/get-user.decorator';
 import { UserType } from 'src/helpers/types';
+import { UpdateDto } from './dto/update.dto';
 
 @ApiTags('user')
 @Controller('user')
@@ -64,6 +66,20 @@ export class UserController {
   @UseGuards(UserGuard)
   @Get('profile/my')
   getMyProfile(@GetUser() user: UserType): Promise<UserModel> {
+    console.log('user', user);
     return this.userService.findById(user.id);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: APISummaries.USER })
+  @ApiOkResponse({ type: UserModel })
+  @ApiBearerAuth()
+  @UseGuards(UserGuard)
+  @Put('profile/update')
+  updateProfile(
+    @Body() dto: UpdateDto,
+    @GetUser() user: UserType,
+  ): Promise<UserModel> {
+    return this.userService.updateProfile(user, dto);
   }
 }

@@ -1,13 +1,26 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import e from 'express';
+import { plainToInstance } from 'class-transformer';
 import { UserType } from 'src/helpers/types';
 import { PrismaService } from 'src/prisma/prisma.service';
 import Stripe from 'stripe';
+import { PurchaseModel } from './model/purchase.model';
+import { ETicketService } from 'src/e-ticket/e-ticket.service';
+import { MailService } from 'src/mail/mail.service';
+import moment from 'moment';
+
+interface GraphData {
+  name: string;
+  total: number;
+}
 
 @Injectable()
 export class StripeService {
   private stripe: Stripe;
-  constructor(private prismaService: PrismaService) {
+  constructor(
+    private prismaService: PrismaService,
+    private eTicketService: ETicketService,
+    private mailService: MailService,
+  ) {
     this.stripe = new Stripe(
       process.env.STRIPE_SECRET_KEY ||
         'sk_test_51PHqG7LJQdX1xHJiTbLebcP4LBi81BZFm7CoMsGqHcsYNUnJqhJWrZ7RscTbIISd1bFa0YiiNjrmXU6HqGWokxrG009VFdBne0',
@@ -16,6 +29,93 @@ export class StripeService {
         typescript: true,
       },
     );
+  }
+
+  async getBilling(): Promise<PurchaseModel[]> {
+    const billing = await this.prismaService.purchase.findMany({
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            name: true,
+          },
+        },
+        event: {
+          include: {
+            ETicketBook: true,
+          },
+        },
+      },
+    });
+
+    return plainToInstance(PurchaseModel, billing);
+  }
+
+  async getTotalRevenue() {
+    const paidOrders = await this.prismaService.purchase.findMany({
+      include: {
+        event: {
+          include: {
+            ETicketBook: true,
+          },
+        },
+      },
+    });
+
+    const totalRevenue = paidOrders.reduce((total, order) => {
+      return total + Number(order.event.ETicketBook.price);
+    }, 0);
+
+    return totalRevenue;
+  }
+
+  async getSalesCount() {
+    const sales = await this.prismaService.purchase.count();
+    return sales;
+  }
+
+  async getGraphRevenue() {
+    const paidOrders = await this.prismaService.purchase.findMany({
+      include: {
+        event: {
+          include: {
+            ETicketBook: true,
+          },
+        },
+      },
+    });
+
+    const monthlyRevenue: { [key: number]: number } = {};
+
+    for (const order of paidOrders) {
+      const month = order.createdAt.getMonth();
+      const revenueForOrder = Number(order.event.ETicketBook.price);
+
+      monthlyRevenue[month] = (monthlyRevenue[month] || 0) + revenueForOrder;
+    }
+
+    const graphData: GraphData[] = [
+      { name: 'Jan', total: 0 },
+      { name: 'Feb', total: 0 },
+      { name: 'Mar', total: 0 },
+      { name: 'Apr', total: 0 },
+      { name: 'May', total: 0 },
+      { name: 'Jun', total: 0 },
+      { name: 'Jul', total: 0 },
+      { name: 'Aug', total: 0 },
+      { name: 'Sep', total: 0 },
+      { name: 'Oct', total: 0 },
+      { name: 'Nov', total: 0 },
+      { name: 'Dec', total: 0 },
+    ];
+
+    // Filling in the revenue data
+    for (const month in monthlyRevenue) {
+      graphData[parseInt(month)].total = monthlyRevenue[parseInt(month)];
+    }
+
+    return graphData;
   }
 
   async checkoutSession(user: UserType, eventId: number, quantity: number) {
@@ -144,10 +244,42 @@ export class StripeService {
         throw new Error('Webhook Error: Missing metadata');
       }
 
+      const customer = await this.prismaService.stripeCustomer.findUnique({
+        where: {
+          userId,
+        },
+      });
+
+      const user = await this.prismaService.user.findUnique({
+        where: {
+          id: +userId,
+        },
+      });
+
+      const event = await this.prismaService.event.findUnique({
+        where: {
+          id: +eventId,
+        },
+        include: {
+          location: true,
+        },
+      });
+
+      if (!user) {
+        throw new Error('User not found');
+      }
+
+      if (!event) {
+        throw new Error('Event not found');
+      }
+
       await this.prismaService.purchase.create({
         data: {
           eventId: +eventId,
           userId: +userId,
+          stripeCheckoutSessionId: session.id,
+          stripeCustomerId: customer.stripeCustomerId,
+          // stripeSubscriptionId: session.subscriptio,
         },
       });
 
@@ -171,17 +303,48 @@ export class StripeService {
           sold,
         },
       });
+      const qrCodes: string[] = [];
 
-      await this.prismaService.eTicket.createMany({
-        data: Array.from({ length: +quantity }).map(() => ({
-          userId: +userId,
-          eventId: +eventId,
-          price: eTicketBook.price,
-          serialNo: Math.random().toString(36).substring(7),
-          currency: eTicketBook.currency,
-          eTicketBookId: eTicketBook.id,
-        })),
-      });
+      for (let i = 0; i < +quantity; i++) {
+        const eTicket = await this.eTicketService.createETicket(
+          {
+            price: eTicketBook.price,
+            serialNo: Math.random().toString(36).substring(7),
+            currency: eTicketBook.currency,
+            eventId: +eventId,
+            eTicketBookId: eTicketBook.id,
+          },
+          +userId,
+        );
+
+        const dataQR = {
+          qrCode: eTicket.QrCode,
+          eTicketId: eTicket.id,
+          eventId: eTicket.eventId,
+        };
+
+        const encodedData = encodeURIComponent(JSON.stringify(dataQR));
+
+        qrCodes.push(encodedData);
+      }
+      const minutes = event.start_time.getMinutes().toString().padStart(2, '0');
+      const hours = event.start_time.getHours().toString().padStart(2, '0');
+      const day = event.start_time.getDate().toString().padStart(2, '0');
+      const month = (event.start_time.getMonth() + 1)
+        .toString()
+        .padStart(2, '0'); // Months are 0-based in JS
+      const year = event.start_time.getFullYear();
+      const formattedDate = `${minutes}-${hours}-${day}-${month}-${year}`;
+      console.log('formattedDate', formattedDate);
+      await this.mailService.sendPurchaseETicketEmail(
+        { name: user.name, email: user.email },
+        {
+          qrCodes,
+          nameEvent: event.name,
+          venue: event.location.address,
+          startDate: formattedDate,
+        },
+      );
     }
   }
 }

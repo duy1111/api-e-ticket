@@ -6,6 +6,8 @@ import { PageDto, PaginationHandle } from 'src/prisma/helper/prisma.helper';
 import { plainToInstance } from 'class-transformer';
 import { EventModel } from './model/event.model';
 import { ETicketBookService } from 'src/e-ticket-book/e-ticket-book.service';
+import { create } from 'domain';
+import { UpdateEventDto } from './dto/update-event.dto';
 
 @Injectable()
 export class EventService {
@@ -41,45 +43,40 @@ export class EventService {
     }
   }
 
-  // async updateEvent(data: UpdateEventDto): Promise<Event> {
-  //   const event = await this.prisma.event.update({
-  //     where: {
-  //       id: data.id,
-  //     },
-  //     data: {
-  //       name: data.name,
-  //       description: data.description,
-  //       start_time: data.start_time,
-  //       imageUrl: data.imageUrl,
-  //       end_time: data.end_time,
-  //       creatorId: data.creatorId,
-  //       locationId: data.locationId,
-  //     },
-  //   });
+  async updateEvent(data: UpdateEventDto, id: number): Promise<string> {
+    const event = await this.prisma.event.update({
+      where: {
+        id: id,
+      },
+      data: {
+        name: data.name,
+        description: data.description,
+        start_time: data.start_time,
+        imageUrl: data.imageUrl,
+        end_time: data.end_time,
+        creatorId: data.creatorId,
+        locationId: data.locationId,
+      },
+    });
 
-  //   // If an ETicketBook is provided, create it
+    const eTicketBook = await this.eTicketBookService.updateETicketBook(
+      data.eTicketBook,
+      event.id,
+    );
 
-  //   if (data.eTicketBook) {
-  //     await this.eTicketBookService.createETicketBook(
-  //       data.eTicketBook,
-  //       event.id,
-  //       new Date(),
-  //       data.start_time,
-  //     );
-
-  //     return event;
-  //   }
-  // }
+    return 'Update success!';
+  }
 
   async getAllEvents(): Promise<EventModel[]> {
-    const dbQuery = {
+    const events = await this.prisma.event.findMany({
       include: {
         location: true,
         ETicketBook: true,
       },
-    };
-
-    const events = await this.prisma.event.findMany(dbQuery);
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
 
     return plainToInstance(EventModel, events);
   }

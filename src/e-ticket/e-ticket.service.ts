@@ -64,6 +64,16 @@ export class ETicketService {
 
     eTicket.redeemTime = new Date();
 
+    await this.prisma.eTicket.update({
+      where: {
+        id: eTicketId,
+      },
+      data: {
+        status: ETicketStatusEnum.REDEEM,
+        redeemTime: new Date(),
+      },
+    });
+
     return plainToInstance(ETicketModel, eTicket);
   }
 
@@ -72,7 +82,7 @@ export class ETicketService {
       where: {
         id,
       },
-      select: {
+      include: {
         user: true,
         event: true,
       },
@@ -98,6 +108,30 @@ export class ETicketService {
             username: true,
           },
         },
+      },
+    });
+
+    return plainToInstance(ETicketModel, eTickets);
+  }
+
+  async getAllETickets() {
+    const eTickets = await this.prisma.eTicket.findMany({
+      include: {
+        event: {
+          include: {
+            location: true,
+          },
+        },
+        user: {
+          select: {
+            id: true,
+            email: true,
+            username: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
       },
     });
 

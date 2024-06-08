@@ -1,19 +1,19 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class scanETicketDto {
-  @IsNumber()
+  @IsString()
   @IsNotEmpty()
-  @ApiProperty({ type: Number, required: true, nullable: false })
-  qrCode!: string;
+  @ApiProperty({ type: String })
+  qrCode?: string;
 
   @IsNumber()
   @IsNotEmpty()
-  @ApiProperty({ type: Number, required: true, nullable: false })
-  eTicketId!: number;
+  @ApiProperty({ type: Number })
+  eTicketId?: number;
 
   @IsNumber()
   @IsNotEmpty()
-  @ApiProperty({ type: Number, required: true, nullable: false })
-  eventId!: number;
+  @ApiProperty({ type: Number })
+  eventId?: number;
 }

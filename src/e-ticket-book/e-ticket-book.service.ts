@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ETicketBook } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateETicketBookDto } from './dto/create-eTicketBook.dto';
+import { UpdateETicketBookDto } from './dto/update-eTicketBook.dto';
 
 @Injectable()
 export class ETicketBookService {
@@ -29,6 +30,22 @@ export class ETicketBookService {
         startTime: startTime,
         closeTime: closeTime,
         eventId: eventId,
+      },
+    });
+  }
+
+  async updateETicketBook(
+    data: UpdateETicketBookDto,
+    eventId: number,
+  ): Promise<void> {
+    await this.prisma.eTicketBook.update({
+      where: {
+        eventId,
+      },
+      data: {
+        total: data.total,
+        price: data.price,
+        currency: data.currency,
       },
     });
   }
