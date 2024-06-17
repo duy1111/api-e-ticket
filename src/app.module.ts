@@ -28,6 +28,7 @@ import {
   EncryptionService,
 } from '@hedger/nestjs-encryption';
 import { StripeModule } from './stripe/stripe.module';
+import { NotificationModule } from './notification/notification.module';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { StripeModule } from './stripe/stripe.module';
     ETicketBookModule,
     ETicketModule,
     StripeModule,
+    NotificationModule,
   ],
   controllers: [AppController],
   providers: [AppService, UserService, ETicketBookService],
