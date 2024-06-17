@@ -124,7 +124,7 @@ model ETicket {
   id            Int                @id @default(autoincrement())
   serialNo      String
   price         Int
-  currency      CurrencyEnum       @default(USD)
+  currency      CurrencyEnum?      @default(USD)
   userId        Int
   eventId       Int
   eTicketBookId Int
@@ -171,6 +171,7 @@ enum LocationStatusEnum {
 enum Role {
   USER
   ADMIN
+  STAFF
 }
 
 enum EventStatusEnum {

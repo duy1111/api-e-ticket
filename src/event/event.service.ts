@@ -8,6 +8,7 @@ import { EventModel } from './model/event.model';
 import { ETicketBookService } from 'src/e-ticket-book/e-ticket-book.service';
 import { create } from 'domain';
 import { UpdateEventDto } from './dto/update-event.dto';
+import e from 'express';
 
 @Injectable()
 export class EventService {
@@ -69,6 +70,11 @@ export class EventService {
 
   async getAllEvents(): Promise<EventModel[]> {
     const events = await this.prisma.event.findMany({
+      where: {
+        status: {
+          not: EventStatusEnum.DEACTIVE,
+        },
+      },
       include: {
         location: true,
         ETicketBook: true,
@@ -82,14 +88,18 @@ export class EventService {
   }
 
   async getListEventIntro(): Promise<EventModel[]> {
-    const dbQuery = {
+    const events = await this.prisma.event.findMany({
+      where: {
+        status: EventStatusEnum.PUBLISHED,
+      },
       include: {
         location: true,
         ETicketBook: true,
       },
-    };
-
-    const events = await this.prisma.event.findMany(dbQuery);
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
 
     return plainToInstance(EventModel, events);
   }
@@ -98,6 +108,9 @@ export class EventService {
     const event = await this.prisma.event.findUnique({
       where: {
         id,
+        status: {
+          not: EventStatusEnum.DEACTIVE,
+        },
       },
       include: {
         location: true,
@@ -128,9 +141,12 @@ export class EventService {
   }
 
   async deleteEvent(id: number): Promise<EventModel> {
-    const event = await this.prisma.event.delete({
+    const event = await this.prisma.event.update({
       where: {
-        id,
+        id: id,
+      },
+      data: {
+        status: EventStatusEnum.DEACTIVE,
       },
     });
 

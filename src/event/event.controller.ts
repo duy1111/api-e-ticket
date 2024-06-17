@@ -38,7 +38,7 @@ export class EventController {
   @ApiOkResponse({ type: Event })
   @ApiBearerAuth()
   @UseGuards(UserGuard)
-  @Post('create')
+  @Post('/create')
   async createLocation(@Body() data: CreateEventDto): Promise<Event> {
     return await this.eventService.createEvent(data);
   }
@@ -48,7 +48,7 @@ export class EventController {
   @ApiOkResponse({ type: Event })
   @ApiBearerAuth()
   @UseGuards(UserGuard)
-  @Put('update/:id')
+  @Put('/update/:id')
   async updateLocation(
     @Body() data: UpdateEventDto,
     @Param('id') id: number,
@@ -80,7 +80,7 @@ export class EventController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: APISummaries.ADMIN })
   @ApiOkResponse({ type: EventModel })
-  @Get(':id')
+  @Get('/:id')
   getEvent(@Param('id') id: number): Promise<EventModel> {
     return this.eventService.getEvent(id);
   }
@@ -90,7 +90,7 @@ export class EventController {
   @ApiOkResponse({ type: EventModel })
   @ApiBearerAuth()
   @UseGuards(AdminGuard)
-  @Post('public')
+  @Post('/public')
   publicEvent(@Body() dto: EventPublicDto): Promise<EventModel> {
     return this.eventService.publicEvent(dto.id);
   }
@@ -100,8 +100,9 @@ export class EventController {
   @ApiOkResponse({ type: EventModel })
   @ApiBearerAuth()
   @UseGuards(UserGuard)
-  @Delete('delete/:id')
+  @Delete('/delete/:id')
   deleteEvent(@Param('id') id: number): Promise<EventModel> {
+    console.log('id', id);
     return this.eventService.deleteEvent(id);
   }
 }
