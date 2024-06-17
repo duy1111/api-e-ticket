@@ -34,9 +34,10 @@ model User {
 
   eventStaff StaffsOnEvents[]
 
-  events    Event[]
-  purchases Purchase[]
-  ETicket   ETicket[]
+  events            Event[]
+  purchases         Purchase[]
+  ETicket           ETicket[]
+  NotificationToken NotificationToken[]
 
   @@index([username])
   @@index([email])
@@ -149,6 +150,18 @@ model StaffsOnEvents {
   event Event @relation(fields: [eventId], references: [id])
 
   @@id([userId, eventId])
+}
+
+model NotificationToken {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  token     String
+  platform  String?
+  provider  String   @default("fcm") @db.VarChar(50)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
 }
 
 enum ETicketStatusEnum {
