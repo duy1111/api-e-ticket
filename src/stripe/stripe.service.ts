@@ -273,16 +273,6 @@ export class StripeService {
         throw new Error('Event not found');
       }
 
-      await this.prismaService.purchase.create({
-        data: {
-          eventId: +eventId,
-          userId: +userId,
-          stripeCheckoutSessionId: session.id,
-          stripeCustomerId: customer.stripeCustomerId,
-          // stripeSubscriptionId: session.subscriptio,
-        },
-      });
-
       const eTicketBook = await this.prismaService.eTicketBook.findUnique({
         where: {
           eventId: +eventId,
@@ -306,6 +296,15 @@ export class StripeService {
       const qrCodes: string[] = [];
 
       for (let i = 0; i < +quantity; i++) {
+        await this.prismaService.purchase.create({
+          data: {
+            eventId: +eventId,
+            userId: +userId,
+            stripeCheckoutSessionId: session.id,
+            stripeCustomerId: customer.stripeCustomerId,
+            // stripeSubscriptionId: session.subscriptio,
+          },
+        });
         const eTicket = await this.eTicketService.createETicket(
           {
             price: eTicketBook.price,

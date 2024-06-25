@@ -70,11 +70,11 @@ export class EventService {
 
   async getAllEvents(): Promise<EventModel[]> {
     const events = await this.prisma.event.findMany({
-      where: {
-        status: {
-          not: EventStatusEnum.DEACTIVE,
-        },
-      },
+      // where: {
+      //   status: {
+      //     not: EventStatusEnum.DEACTIVE,
+      //   },
+      // },
       include: {
         location: true,
         ETicketBook: true,
@@ -108,9 +108,6 @@ export class EventService {
     const event = await this.prisma.event.findUnique({
       where: {
         id,
-        status: {
-          not: EventStatusEnum.DEACTIVE,
-        },
       },
       include: {
         location: true,

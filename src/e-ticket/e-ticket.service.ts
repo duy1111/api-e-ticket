@@ -109,6 +109,9 @@ export class ETicketService {
           },
         },
       },
+      orderBy: {
+        createdAt: 'desc',
+      },
     });
 
     return plainToInstance(ETicketModel, eTickets);
