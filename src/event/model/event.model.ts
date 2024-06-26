@@ -26,6 +26,10 @@ export class EventModel {
   end_time: Date;
 
   @Expose()
+  @ApiProperty({ type: Date })
+  start_time: Date;
+
+  @Expose()
   @ApiProperty({ type: Number })
   creatorId: number;
 

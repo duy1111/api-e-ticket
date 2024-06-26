@@ -88,9 +88,21 @@ export class EventService {
   }
 
   async getListEventIntro(): Promise<EventModel[]> {
-    const events = await this.prisma.event.findMany({
+    const eventsActive = await this.prisma.event.findMany({
       where: {
         status: EventStatusEnum.PUBLISHED,
+        AND: [
+          {
+            start_time: {
+              lte: new Date(), // Less than or equal to current time
+            },
+          },
+          {
+            end_time: {
+              gte: new Date(), // Greater than or equal to current time
+            },
+          },
+        ],
       },
       include: {
         location: true,
@@ -101,7 +113,26 @@ export class EventService {
       },
     });
 
-    return plainToInstance(EventModel, events);
+    const eventsUpcoming = await this.prisma.event.findMany({
+      where: {
+        status: EventStatusEnum.PUBLISHED,
+        start_time: {
+          gt: new Date(), // Greater than current time
+        },
+      },
+      include: {
+        location: true,
+        ETicketBook: true,
+      },
+      orderBy: {
+        start_time: 'asc', // Sắp xếp theo thời gian bắt đầu từ gần đến xa
+      },
+    });
+
+    // Nối danh sách sự kiện đang diễn ra và sắp diễn ra, đảm bảo sự kiện đang diễn ra xuất hiện trước
+    const combinedEvents = [...eventsActive, ...eventsUpcoming];
+
+    return plainToInstance(EventModel, combinedEvents);
   }
 
   async getEvent(id: number): Promise<EventModel> {
