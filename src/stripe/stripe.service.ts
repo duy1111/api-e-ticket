@@ -167,7 +167,7 @@ export class StripeService {
           currency: 'usd',
           product_data: {
             name: event.name,
-            description: event.description,
+            description: 'Thank you for purchasing the ticket',
             images: [event.imageUrl],
           },
           unit_amount: +event.ETicketBook.price * 100,

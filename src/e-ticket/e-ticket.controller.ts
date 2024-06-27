@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -94,5 +95,14 @@ export class ETicketController {
   @UseGuards(UserGuard)
   async sendETicket(@GetUser() user: UserType, @Body() params: SendETicketDto) {
     return await this.eTicketService.sendETicket(params, user);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: APISummaries.USER })
+  @Delete('/delete/:id')
+  @ApiBearerAuth()
+  @UseGuards(UserGuard)
+  async deleteETicket(@Param('id') id: number) {
+    return await this.eTicketService.deleteETicket(id);
   }
 }

@@ -183,6 +183,7 @@ export class ETicketService {
         id: +eTicketId,
       },
     });
+    delete eTicket.QrCode;
 
     if (eTicket.userId !== owner.id) {
       throw new BadRequestException('User invalid!');
@@ -202,5 +203,15 @@ export class ETicketService {
     });
 
     return 'Send e-ticket success!';
+  }
+
+  async deleteETicket(id: number) {
+    await this.prisma.eTicket.delete({
+      where: {
+        id,
+      },
+    });
+
+    return 'Delete e-ticket success!';
   }
 }
