@@ -81,6 +81,7 @@ export class AuthService {
     if (!passwordMatches)
       throw new ForbiddenException(ErrorMessages.AUTH.CREDENTIALS_INCORRECT);
 
+    delete user.hashedPassword;
     return this.signToken(user);
   }
 
@@ -89,7 +90,7 @@ export class AuthService {
     const payload = pick(user, pickedFields);
 
     const accessToken: string = await this.jwt.signAsync(payload, {
-      expiresIn: '60m',
+      expiresIn: '24h',
       secret: process.env.JWT_SECRET,
     });
 

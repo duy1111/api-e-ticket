@@ -1,11 +1,16 @@
 import { Cipher, EncryptionService } from '@hedger/nestjs-encryption';
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateETicketDto } from './dto/e-ticket.dto';
-import { ETicketStatusEnum } from '@prisma/client';
+import { ETicketStatusEnum, User } from '@prisma/client';
 import { plainToInstance } from 'class-transformer';
 import { ETicketModel } from './model/e-ticket.model';
-import e from 'express';
+import { genRandomString } from 'src/helpers/helpers';
+import { RegisterDto } from 'src/auth/dto/auth.dto';
+import { SendETicketDto } from './dto/send-e-ticket.dto';
+import { UserType } from 'src/helpers/types';
+import * as argon from 'argon2';
+
 // const key = EncryptionService.generateKey(Cipher.AES_256_CBC);
 const key = EncryptionService.generateKey(Cipher.AES_256_CBC);
 console.log(key);
@@ -139,5 +144,63 @@ export class ETicketService {
     });
 
     return plainToInstance(ETicketModel, eTickets);
+  }
+
+  async sendETicket(params: SendETicketDto, owner: UserType) {
+    const eTicketId = params.eTicketId;
+
+    const userPlaceholder: RegisterDto = {
+      email: params.email,
+      password: '123456a@',
+      username: genRandomString(12),
+      name: 'John Doe',
+    };
+    let InvitationUser: User;
+    const checkEmailExist = await this.prisma.user.findUnique({
+      where: {
+        email: params.email,
+      },
+    });
+
+    if (!checkEmailExist) {
+      InvitationUser = await this.prisma.user.create({
+        data: {
+          email: userPlaceholder.email,
+          username: userPlaceholder.username,
+          hashedPassword: await argon.hash(userPlaceholder.password),
+          name: userPlaceholder.name,
+        },
+      });
+      if (!InvitationUser) {
+        throw new BadRequestException('Failed create new user!');
+      }
+    } else {
+      InvitationUser = checkEmailExist;
+    }
+
+    const eTicket = await this.prisma.eTicket.findUnique({
+      where: {
+        id: +eTicketId,
+      },
+    });
+
+    if (eTicket.userId !== owner.id) {
+      throw new BadRequestException('User invalid!');
+    }
+
+    eTicket.userId = InvitationUser.id;
+    eTicket.QrCode = this.crypto.encrypt(JSON.stringify(eTicket));
+
+    await this.prisma.eTicket.update({
+      where: {
+        id: +eTicketId,
+      },
+      data: {
+        userId: InvitationUser.id,
+        QrCode: eTicket.QrCode,
+      },
+    });
+
+    return 'Send e-ticket success!';
   }
 }

@@ -1,5 +1,11 @@
-import { Injectable } from '@nestjs/common';
-import { ETicketBookStatus, Event, EventStatusEnum } from '@prisma/client';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  ETicket,
+  ETicketBookStatus,
+  Event,
+  EventStatusEnum,
+  User,
+} from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { PageDto, PaginationHandle } from 'src/prisma/helper/prisma.helper';
@@ -9,12 +15,22 @@ import { ETicketBookService } from 'src/e-ticket-book/e-ticket-book.service';
 import { create } from 'domain';
 import { UpdateEventDto } from './dto/update-event.dto';
 import e from 'express';
+import { SendETicketDto } from 'src/e-ticket/dto/send-e-ticket.dto';
+import { UserType } from 'src/helpers/types';
+import { AuthService } from 'src/auth/auth.service';
+import * as argon from 'argon2';
+import { RegisterDto } from 'src/auth/dto/auth.dto';
+import { randomUUID } from 'crypto';
+import { genRandomString } from 'src/helpers/helpers';
+import { UserService } from 'src/user/user.service';
+import { EncryptionService } from '@hedger/nestjs-encryption';
 
 @Injectable()
 export class EventService {
   constructor(
     private prisma: PrismaService,
     private eTicketBookService: ETicketBookService,
+    private readonly crypto: EncryptionService,
   ) {}
 
   async createEvent(data: CreateEventDto): Promise<Event> {

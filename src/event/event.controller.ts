@@ -8,9 +8,7 @@ import {
   Param,
   Post,
   Put,
-  Query,
   UseGuards,
-  ValidationPipe,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -19,14 +17,13 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { Event } from '@prisma/client';
+import { AdminGuard, UserGuard } from 'src/auth/guard/auth.guard';
 import { APISummaries } from 'src/helpers/helpers';
 import { CreateEventDto } from './dto/create-event.dto';
-import { EventService } from './event.service';
-import { PageDto } from 'src/prisma/helper/prisma.helper';
-import { EventModel } from './model/event.model';
 import { EventPublicDto } from './dto/event-public.dto';
-import { AdminGuard, UserGuard } from 'src/auth/guard/auth.guard';
 import { UpdateEventDto } from './dto/update-event.dto';
+import { EventService } from './event.service';
+import { EventModel } from './model/event.model';
 
 @ApiTags('event')
 @Controller('event')
@@ -74,7 +71,7 @@ export class EventController {
   // @UseGuards(UserGuard)
   @Get('/intro')
   listEventIntro(): Promise<EventModel[]> {
-    return this.eventService.getAllEvents();
+    return this.eventService.getListEventIntro();
   }
 
   @HttpCode(HttpStatus.OK)
@@ -102,7 +99,6 @@ export class EventController {
   @UseGuards(UserGuard)
   @Delete('/delete/:id')
   deleteEvent(@Param('id') id: number): Promise<EventModel> {
-    console.log('id', id);
     return this.eventService.deleteEvent(id);
   }
 }

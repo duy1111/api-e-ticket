@@ -23,6 +23,7 @@ import { GetUser } from 'src/auth/decorator/get-user.decorator';
 import { UserType } from 'src/helpers/types';
 import { scanETicketDto } from './dto/scan-e-ticket.dto';
 import { AdminGuard, UserGuard } from 'src/auth/guard/auth.guard';
+import { SendETicketDto } from './dto/send-e-ticket.dto';
 
 @ApiTags('e-ticket')
 @Controller('e-ticket')
@@ -84,5 +85,14 @@ export class ETicketController {
       dto.eTicketId,
       dto.eTicketId,
     );
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: APISummaries.USER })
+  @Post('/sendETicket')
+  @ApiBearerAuth()
+  @UseGuards(UserGuard)
+  async sendETicket(@GetUser() user: UserType, @Body() params: SendETicketDto) {
+    return await this.eTicketService.sendETicket(params, user);
   }
 }
