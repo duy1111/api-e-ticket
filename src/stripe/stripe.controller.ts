@@ -23,7 +23,7 @@ export class StripeController {
   constructor(private stripeService: StripeService) {}
 
   @HttpCode(HttpStatus.OK)
-  @Post('checkout-session')
+  @Post('/checkout-session')
   @ApiBearerAuth()
   @UseGuards(UserGuard)
   checkoutSession(
@@ -34,7 +34,7 @@ export class StripeController {
   }
 
   @HttpCode(HttpStatus.OK)
-  @Post('webhook')
+  @Post('/webhook')
   webhookReceiver(
     @Req() req: RequestWithRawBody,
     @Headers('stripe-signature') signature: string,
@@ -43,7 +43,7 @@ export class StripeController {
   }
 
   @HttpCode(HttpStatus.OK)
-  @Get('billing')
+  @Get('/billing')
   @ApiBearerAuth()
   @UseGuards(AdminGuard)
   async getBilling(): Promise<PurchaseModel[]> {
@@ -51,7 +51,7 @@ export class StripeController {
   }
 
   @HttpCode(HttpStatus.OK)
-  @Get('getTotalRevenue')
+  @Get('/getTotalRevenue')
   @ApiBearerAuth()
   @UseGuards(AdminGuard)
   async getTotalRevenue(): Promise<number> {
@@ -59,7 +59,7 @@ export class StripeController {
   }
 
   @HttpCode(HttpStatus.OK)
-  @Get('getSalesCount')
+  @Get('/getSalesCount')
   @ApiBearerAuth()
   @UseGuards(AdminGuard)
   async getSalesCount(): Promise<number> {
@@ -67,7 +67,7 @@ export class StripeController {
   }
 
   @HttpCode(HttpStatus.OK)
-  @Get('getGraphRevenue')
+  @Get('/getGraphRevenue')
   @ApiBearerAuth()
   @UseGuards(AdminGuard)
   async getGraphRevenue(): Promise<any[]> {

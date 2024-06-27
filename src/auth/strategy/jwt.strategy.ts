@@ -31,7 +31,7 @@ export class UserStrategy extends PassportStrategy(Strategy, 'user') {
     if (!user) return null;
 
     delete user.hashedPassword;
-    if (user.role === Role.USER || user.role === Role.ADMIN) return user;
+    return user;
   }
 }
 
