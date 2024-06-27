@@ -48,6 +48,10 @@ export class ETicketService {
       where: {
         id: eTicketId,
       },
+      include: {
+        event: true,
+        user: true,
+      },
     });
 
     if (!eTicket) {
