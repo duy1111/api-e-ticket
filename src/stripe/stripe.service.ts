@@ -47,6 +47,9 @@ export class StripeService {
           },
         },
       },
+      orderBy: {
+        createdAt: 'desc',
+      },
     });
 
     return plainToInstance(PurchaseModel, billing);
