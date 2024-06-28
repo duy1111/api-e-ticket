@@ -68,8 +68,8 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: String })
   @Post('reset-password')
-  resetPassword(@Body() dto: ResetPasswordDto) {
-    this.authService.resetPassword(dto);
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    await this.authService.resetPassword(dto);
 
     return 'Password reset successfully';
   }

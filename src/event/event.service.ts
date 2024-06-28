@@ -110,12 +110,12 @@ export class EventService {
         AND: [
           {
             start_time: {
-              lte: new Date(), // Less than or equal to current time
+              lte: new Date(),
             },
           },
           {
             end_time: {
-              gte: new Date(), // Greater than or equal to current time
+              gte: new Date(),
             },
           },
         ],
